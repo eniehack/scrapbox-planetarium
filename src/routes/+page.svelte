@@ -2,21 +2,20 @@
 	import FileSelector from './FileSelector.svelte';
 	import { file } from '$lib/store';
 	import Graph from 'graphology';
-	import circular from "graphology-layout/circular";
-	import forceAtlas2 from "graphology-layout-forceatlas2";
+	import circular from 'graphology-layout/circular';
+	import forceAtlas2 from 'graphology-layout-forceatlas2';
 	import { onMount } from 'svelte';
 
 	let showModal = true;
 	let container: HTMLElement;
-	
+
 	onMount(async () => {
-		const { Sigma } = await import("sigma");
-		file.subscribe(file => {
+		const { Sigma } = await import('sigma');
+		file.subscribe((file) => {
 			if (file === null) return;
 
-
 			//showModal = false;
-			console.log(file)
+			console.log(file);
 			const graph = new Graph();
 			for (const page of file.pages) {
 				graph.mergeNode(page.title, { id: page.id, label: page.title });
@@ -35,8 +34,8 @@
 				const deg = graph.degree(node);
 				graph.setNodeAttribute(
 					node,
-					"size",
-					minSize + ((deg - minDegree) / (maxDegree - minDegree)) * (maxSize - minSize),
+					'size',
+					minSize + ((deg - minDegree) / (maxDegree - minDegree)) * (maxSize - minSize)
 				);
 			});
 
@@ -45,9 +44,8 @@
 			forceAtlas2.assign(graph, { settings, iterations: 600 });
 
 			new Sigma(graph, container);
-		})
-	})
-
+		});
+	});
 </script>
 
 <svelte:head>
@@ -62,10 +60,10 @@
 
 <style>
 	#sigma-container {
-        width: 100vw;
-        height: 100vh;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
+		width: 100vw;
+		height: 100vh;
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+	}
 </style>
