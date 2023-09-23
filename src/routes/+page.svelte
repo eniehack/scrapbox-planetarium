@@ -18,10 +18,18 @@
 			console.log(file);
 			const graph = new Graph();
 			for (const page of file.pages) {
-				graph.mergeNode(page.title, { id: page.id, label: page.title });
+				graph.addNode(page.title, { id: page.id, label: page.title });
+			}
+			for (const page of file.pages) {
 				for (const linkedElem of page.linksLc) {
-					graph.mergeNode(linkedElem);
-					graph.addEdge(page.title, linkedElem);
+					const directedNode = graph.findNode((node) => node === linkedElem);
+					if (typeof directedNode === "undefined") {
+						graph.mergeNode(linkedElem, {label: linkedElem});
+						graph.addEdge(page.title, linkedElem);
+					} else {
+						graph.addEdge(page.title, directedNode);
+					}
+
 				}
 			}
 
