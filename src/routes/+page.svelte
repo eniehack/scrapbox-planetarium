@@ -54,9 +54,7 @@
 </svelte:head>
 
 <FileSelector {showModal} />
-{#if $file !== null}
-	<div id="sigma-container" bind:this={container}></div>
-{/if}
+<div id="sigma-container" bind:this={container} />
 
 <style>
 	#sigma-container {
