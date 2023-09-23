@@ -14,22 +14,30 @@
 		file.subscribe((file) => {
 			if (file === null) return;
 
-			//showModal = false;
-			console.log(file);
 			const graph = new Graph();
 			for (const page of file.pages) {
-				graph.addNode(page.title, { id: page.id, label: page.title });
+				graph.addNode(page.id, { label: page.title.toLowerCase() });
 			}
+
 			for (const page of file.pages) {
 				for (const linkedElem of page.linksLc) {
-					const directedNode = graph.findNode((node) => node === linkedElem);
-					if (typeof directedNode === "undefined") {
-						graph.mergeNode(linkedElem, {label: linkedElem});
-						graph.addEdge(page.title, linkedElem);
+					const directedNode = graph.findNode((node, attr) =>
+						attr.label == null ? false : attr.label.toLowerCase() === linkedElem.toLowerCase()
+					);
+					if (typeof directedNode === 'undefined') {
+						const fromFile = file.pages.find((elem) => {
+							elem.title.toLowerCase() === linkedElem.toLowerCase();
+						});
+						if (typeof fromFile === 'undefined') {
+							graph.addNode(linkedElem.toLowerCase(), { label: linkedElem.toLowerCase() });
+							graph.addEdge(page.id, linkedElem.toLowerCase(), { type: 'arrow' });
+						} else {
+							graph.mergeNode(fromFile.id, { label: fromFile.title.toLowerCase() });
+							graph.addEdge(page.id, fromFile.id, { type: 'arrow' });
+						}
 					} else {
-						graph.addEdge(page.title, directedNode);
+						graph.addEdge(page.id, directedNode, { type: 'arrow' });
 					}
-
 				}
 			}
 
