@@ -33,13 +33,13 @@
 				}
 			}
 
-			const degrees = graph.nodes().map((node) => graph.degree(node));
+			const degrees = graph.nodes().map((node) => graph.inDegree(node));
 			const minDegree = Math.min(...degrees);
 			const maxDegree = Math.max(...degrees);
 			const minSize = 2;
 			const maxSize = 15;
 			graph.forEachNode((node) => {
-				const deg = graph.degree(node);
+				const deg = graph.inDegree(node);
 				graph.setNodeAttribute(
 					node,
 					'size',
