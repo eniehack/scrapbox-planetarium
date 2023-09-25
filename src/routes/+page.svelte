@@ -5,9 +5,25 @@
 	import circular from 'graphology-layout/circular';
 	import forceAtlas2 from 'graphology-layout-forceatlas2';
 	import { onMount } from 'svelte';
+	import type { EdgeDisplayData, NodeDisplayData } from 'sigma/types';
+	import type Sigma from 'sigma';
 
 	let showModal = true;
 	let container: HTMLElement;
+	let hoveredNode: string | undefined;
+	let hoveredNeibors: Set<string> | undefined;
+	
+	const setHoveredNode = (renderer: Sigma, graph: Graph, node?: string) => {
+		if (typeof node === "undefined") {
+			hoveredNode = undefined;
+			hoveredNeibors = undefined;
+		} else {
+			hoveredNode = node;
+			hoveredNeibors = new Set(graph.neighbors(node));
+		}
+		
+		renderer.refresh();
+	}
 
 	onMount(async () => {
 		const { Sigma } = await import('sigma');
@@ -59,7 +75,32 @@
 			const settings = forceAtlas2.inferSettings(graph);
 			forceAtlas2.assign(graph, { settings, iterations: 600 });
 
-			new Sigma(graph, container);
+			const renderer = new Sigma(graph, container);
+			renderer.on("enterNode", ({ node }) => {
+				setHoveredNode(renderer, graph, node);
+			});
+			renderer.on("leaveNode", () => {
+				setHoveredNode(renderer, graph, undefined);
+			});
+
+			renderer.setSetting("nodeReducer", (node, data) => {
+				const res: Partial<NodeDisplayData> = { ...data };
+				
+				if (hoveredNeibors && !hoveredNeibors.has(node) && hoveredNode !== node) {
+					res.label = "";
+					res.color = "#f6f6f6";
+				}
+
+				return res;
+			});
+			renderer.setSetting("edgeReducer", (edge, data) => {
+				const res: Partial<EdgeDisplayData> = { ...data };
+
+				if (hoveredNode && !graph.hasExtremity(edge, hoveredNode)) {
+					res.hidden = true;
+				}
+				return res;
+			})
 		});
 	});
 </script>
