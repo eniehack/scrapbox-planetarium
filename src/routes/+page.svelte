@@ -60,8 +60,8 @@
 			const degrees = graph.nodes().map((node) => graph.inDegree(node));
 			const minDegree = Math.min(...degrees);
 			const maxDegree = Math.max(...degrees);
-			const minSize = 2;
-			const maxSize = 15;
+			const minSize = 4;
+			const maxSize = 25;
 			graph.forEachNode((node) => {
 				const deg = graph.inDegree(node);
 				graph.setNodeAttribute(
