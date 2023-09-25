@@ -16,23 +16,23 @@
 
 			const graph = new Graph();
 			for (const page of file.pages) {
-				graph.addNode(page.id, { label: page.title.toLowerCase() });
+				graph.addNode(page.id, { label: page.title.toLowerCase().replaceAll(" ", "_") });
 			}
 
 			for (const page of file.pages) {
 				for (const linkedElem of page.linksLc) {
 					const directedNode = graph.findNode((node, attr) =>
-						attr.label == null ? false : attr.label.toLowerCase() === linkedElem.toLowerCase()
+						attr.label == null ? false : attr.label.toLowerCase().replaceAll(" ", "_") === linkedElem.toLowerCase().replaceAll(" ", "_")
 					);
 					if (typeof directedNode === 'undefined') {
 						const fromFile = file.pages.find((elem) => {
-							elem.title.toLowerCase() === linkedElem.toLowerCase();
+							elem.title.toLowerCase().replaceAll(" ", "_") === linkedElem.toLowerCase().replaceAll(" ", "_");
 						});
 						if (typeof fromFile === 'undefined') {
-							graph.addNode(linkedElem.toLowerCase(), { label: linkedElem.toLowerCase() });
-							graph.addEdge(page.id, linkedElem.toLowerCase(), { type: 'arrow' });
+							graph.addNode(linkedElem.toLowerCase().replaceAll(" ", "_"), { label: linkedElem.toLowerCase().replaceAll(" ", "_") });
+							graph.addEdge(page.id, linkedElem.toLowerCase().replaceAll(" ", "_"), { type: 'arrow' });
 						} else {
-							graph.mergeNode(fromFile.id, { label: fromFile.title.toLowerCase() });
+							graph.mergeNode(fromFile.id, { label: fromFile.title.toLowerCase().replaceAll(" ", "_") });
 							graph.addEdge(page.id, fromFile.id, { type: 'arrow' });
 						}
 					} else {
