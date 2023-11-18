@@ -1,6 +1,6 @@
 <script lang="ts">
 	import BaseModal from '$lib/BaseModal.svelte';
-import { schema } from '$lib/load';
+	import { schema } from '$lib/load';
 	import { file as fileStore } from '$lib/store';
 
 	let dialog: HTMLDialogElement;
@@ -25,10 +25,14 @@ import { schema } from '$lib/load';
 
 <BaseModal bind:showModal>
 	<label for="project">対象とするproject</label>
-	<input name="project" type="text" bind:value={target_project}>
-	{#if target_project !== ""}
+	<input name="project" type="text" bind:value={target_project} />
+	{#if target_project !== ''}
 		<p>
-			<a href={`https://scrapbox.io/projects/${target_project}/settings/backup`} target="_blank" rel="noreferrer noopener">ここ</a>
+			<a
+				href={`https://scrapbox.io/projects/${target_project}/settings/backup`}
+				target="_blank"
+				rel="noreferrer noopener">ここ</a
+			>
 			を開いてJSONを入手します
 		</p>
 	{/if}
