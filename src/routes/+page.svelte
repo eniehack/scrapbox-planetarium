@@ -162,6 +162,11 @@
 <svelte:head>
 	<title>Home</title>
 	<meta name="description" content="Svelte demo app" />
+	<style>
+		body {
+			margin: 0;
+		}
+	</style>
 </svelte:head>
 
 <FileSelector {showModal} />
