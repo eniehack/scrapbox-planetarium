@@ -53,7 +53,7 @@ jobs:
         uses: actions/upload-pages-artifact@v1
         with:
           # this should match the `pages` option in your adapter-static options
-          path: '$ARTIFACT_DIR/'
+          path: ${{ env.ARTIFACT_DIR }}/
 
   deploy:
     needs: build_site
