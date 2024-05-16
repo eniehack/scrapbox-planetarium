@@ -4,6 +4,10 @@ on:
   push:
     branches: 'trunk'
 
+env:
+  ARTIFACT_DIR: "build"
+  BASE_PATH: '/scrapbox-planetarium'
+
 jobs:
   build_site:
     runs-on: ubuntu-latest
@@ -40,16 +44,16 @@ jobs:
 
       - name: build
         env:
-          BASE_PATH: '/scrapbox-planetarium'
+          BASE_PATH: ${{ env.BASE_PATH }}
         run: |
           pnpm run build
-          touch build/.nojekyll
+          touch $ARTIFACT_DIR/.nojekyll
 
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v1
         with:
           # this should match the `pages` option in your adapter-static options
-          path: 'build/'
+          path: '$ARTIFACT_DIR/'
 
   deploy:
     needs: build_site
