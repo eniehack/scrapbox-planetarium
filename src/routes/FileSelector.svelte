@@ -20,10 +20,9 @@
 			dialog.close();
 		}
 	}
-	$: if (dialog && showModal) dialog.showModal();
 </script>
 
-<BaseModal bind:showModal>
+<BaseModal bind:showModal bind:dialog>
   <h2>使い方</h2>
   <ol>
     <li>
