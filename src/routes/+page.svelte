@@ -136,6 +136,11 @@
 			renderer.on('leaveNode', () => {
 				setHoveredNode(renderer, graph, undefined);
 			});
+			renderer.on('clickNode', ({ node: node_id }) => {
+				const node = graph.findNode((node) => node === node_id)
+        		const label = graph.getNodeAttribute(node, "label");
+        		window.open(`https://scrapbox.io/${file.name}/${label.replaceAll('_', ' ')}`, '_blank', 'noopener,noreferrer');
+			});
 
 			renderer.setSetting('nodeReducer', (node, data) => {
 				const res: Partial<NodeDisplayData> = { ...data };
