@@ -1,25 +1,33 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import BaseModal from '$lib/BaseModal.svelte';
 	import { schema } from '$lib/load';
 	import { file as fileStore } from '$lib/store';
 
-	let dialog: HTMLDialogElement;
-	let file: FileList;
-	let target_project: string;
-	export let showModal: boolean;
-
-	$: if (file) {
-		console.log(file);
-
-		const f = file.item(0);
-		if (f !== null) {
-			f.text()
-				.then((txt) => JSON.parse(txt))
-				.then((json) => schema.parse(json))
-				.then((data) => fileStore.set(data));
-			dialog.close();
-		}
+	let dialog: HTMLDialogElement = $state();
+	let file: FileList = $state();
+	let target_project: string = $state();
+	interface Props {
+		showModal: boolean;
 	}
+
+	let { showModal = $bindable() }: Props = $props();
+
+	run(() => {
+		if (file) {
+			console.log(file);
+
+			const f = file.item(0);
+			if (f !== null) {
+				f.text()
+					.then((txt) => JSON.parse(txt))
+					.then((json) => schema.parse(json))
+					.then((data) => fileStore.set(data));
+				dialog.close();
+			}
+		}
+	});
 </script>
 
 <BaseModal bind:showModal bind:dialog>

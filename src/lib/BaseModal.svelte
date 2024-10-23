@@ -1,21 +1,30 @@
 <script lang="ts">
-	export let showModal: boolean;
+	import { run, self } from 'svelte/legacy';
 
-	export let dialog: HTMLDialogElement;
 
-	$: if (dialog && showModal) dialog.showModal();
+	interface Props {
+		showModal: boolean;
+		dialog: HTMLDialogElement;
+		children?: import('svelte').Snippet;
+	}
+
+	let { showModal = $bindable(), dialog = $bindable(), children }: Props = $props();
+
+	run(() => {
+		if (dialog && showModal) dialog.showModal();
+	});
 </script>
 
 <dialog
 	bind:this={dialog}
-	on:close={() => (showModal = false)}
-	on:click|self={() => dialog.close()}
+	onclose={() => (showModal = false)}
+	onclick={self(() => dialog.close())}
 >
 	<div>
-		<div class="header" />
-		<slot />
+		<div class="header"></div>
+		{@render children?.()}
 		<div class="footer">
-			<button on:click={() => dialog.close()}>close</button>
+			<button onclick={() => dialog.close()}>close</button>
 		</div>
 	</div>
 </dialog>

@@ -14,7 +14,7 @@
 	};
 
 	let showModal = true;
-	let container: HTMLElement;
+	let container: HTMLElement = $state();
 	let hoveredNode: string | undefined;
 	let hoveredNeibors: Set<string> | undefined;
 
@@ -175,7 +175,7 @@
 </svelte:head>
 
 <FileSelector {showModal} />
-<div id="sigma-container" bind:this={container} />
+<div id="sigma-container" bind:this={container}></div>
 
 <style>
 	#sigma-container {
