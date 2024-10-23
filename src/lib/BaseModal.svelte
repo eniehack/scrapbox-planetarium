@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { run, self } from 'svelte/legacy';
 
-
 	interface Props {
 		showModal: boolean;
 		dialog: HTMLDialogElement;
@@ -15,11 +14,7 @@
 	});
 </script>
 
-<dialog
-	bind:this={dialog}
-	onclose={() => (showModal = false)}
-	onclick={self(() => dialog.close())}
->
+<dialog bind:this={dialog} onclose={() => (showModal = false)} onclick={self(() => dialog.close())}>
 	<div>
 		<div class="header"></div>
 		{@render children?.()}
