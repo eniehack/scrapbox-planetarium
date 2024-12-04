@@ -14,7 +14,7 @@
 	}
 
 	const showModal = true;
-	let container: HTMLElement = $state();
+	let container = $state<HTMLElement>();
 	let hoveredNode: string | undefined;
 	let hoveredNeibors: Set<string> | undefined;
 
@@ -32,6 +32,7 @@
 
 	onMount(async () => {
 		const { Sigma } = await import('sigma');
+		if (typeof container === "undefined") return
 		file.subscribe((file) => {
 			if (file === null) return;
 
