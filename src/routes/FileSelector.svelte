@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import BaseModal from '$lib/BaseModal.svelte';
 	import { schema } from '$lib/load';
 	import { file as fileStore } from '$lib/store';
@@ -14,7 +12,7 @@
 
 	let { showModal = $bindable() }: Props = $props();
 
-	run(() => {
+	$effect(() => {
 		if (file) {
 			console.log(file);
 
