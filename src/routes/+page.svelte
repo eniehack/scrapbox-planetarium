@@ -8,12 +8,12 @@
 	import type { EdgeDisplayData, NodeDisplayData } from 'sigma/types';
 	import type Sigma from 'sigma';
 
-	type OutDegrees = {
+	interface OutDegrees {
 		percent: number;
 		node: string;
-	};
+	}
 
-	let showModal = true;
+	const showModal = true;
 	let container: HTMLElement = $state();
 	let hoveredNode: string | undefined;
 	let hoveredNeibors: Set<string> | undefined;
@@ -78,7 +78,7 @@
 			console.log(edgeCount);
 			const minDegree = Math.min(...inDegrees);
 			const maxDegree = Math.max(...inDegrees);
-			const outDegrees: Array<OutDegrees> = [];
+			const outDegrees: OutDegrees[] = [];
 			graph
 				.nodes()
 				.forEach((node) =>

@@ -5,7 +5,7 @@
 	 */
 
 	/** @type {Props} */
-	let { children } = $props();
+	const { children } = $props();
 </script>
 
 <div class="app">

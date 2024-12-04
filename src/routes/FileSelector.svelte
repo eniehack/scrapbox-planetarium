@@ -21,7 +21,7 @@
 				f.text()
 					.then((txt) => JSON.parse(txt))
 					.then((json) => schema.parse(json))
-					.then((data) => fileStore.set(data));
+					.then((data) => { fileStore.set(data); });
 				dialog.close();
 			}
 		}
