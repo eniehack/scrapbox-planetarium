@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const schema = z.object({
-  name: z.string(),
+	name: z.string(),
 	exported: z.number(),
 	pages: z.array(
 		z.object({

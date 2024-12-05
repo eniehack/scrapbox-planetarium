@@ -8,13 +8,13 @@
 	import type { EdgeDisplayData, NodeDisplayData } from 'sigma/types';
 	import type Sigma from 'sigma';
 
-	type OutDegrees = {
+	interface OutDegrees {
 		percent: number;
 		node: string;
-	};
+	}
 
-	let showModal = true;
-	let container: HTMLElement;
+	const showModal = true;
+	let container = $state<HTMLElement>();
 	let hoveredNode: string | undefined;
 	let hoveredNeibors: Set<string> | undefined;
 
@@ -32,6 +32,7 @@
 
 	onMount(async () => {
 		const { Sigma } = await import('sigma');
+		if (typeof container === "undefined") return
 		file.subscribe((file) => {
 			if (file === null) return;
 
@@ -47,7 +48,7 @@
 						attr.label == null
 							? false
 							: attr.label.toLowerCase().replaceAll(' ', '_') ===
-							  linkedElem.toLowerCase().replaceAll(' ', '_')
+								linkedElem.toLowerCase().replaceAll(' ', '_')
 					);
 					if (typeof directedNode === 'undefined') {
 						const fromFile = file.pages.find((elem) => {
@@ -78,7 +79,7 @@
 			console.log(edgeCount);
 			const minDegree = Math.min(...inDegrees);
 			const maxDegree = Math.max(...inDegrees);
-			const outDegrees: Array<OutDegrees> = [];
+			const outDegrees: OutDegrees[] = [];
 			graph
 				.nodes()
 				.forEach((node) =>
@@ -137,9 +138,13 @@
 				setHoveredNode(renderer, graph, undefined);
 			});
 			renderer.on('clickNode', ({ node: node_id }) => {
-				const node = graph.findNode((node) => node === node_id)
-        		const label = graph.getNodeAttribute(node, "label");
-        		window.open(`https://scrapbox.io/${file.name}/${label.replaceAll('_', ' ')}`, '_blank', 'noopener,noreferrer');
+				const node = graph.findNode((node) => node === node_id);
+				const label = graph.getNodeAttribute(node, 'label');
+				window.open(
+					`https://scrapbox.io/${file.name}/${label.replaceAll('_', ' ')}`,
+					'_blank',
+					'noopener,noreferrer'
+				);
 			});
 
 			renderer.setSetting('nodeReducer', (node, data) => {
@@ -175,7 +180,7 @@
 </svelte:head>
 
 <FileSelector {showModal} />
-<div id="sigma-container" bind:this={container} />
+<div id="sigma-container" bind:this={container}></div>
 
 <style>
 	#sigma-container {
