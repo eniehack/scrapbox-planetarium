@@ -7,25 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      globals:
-        specifier: ^15.11.0
-        version: 15.11.0
-      graphology:
-        specifier: ^0.25.4
-        version: 0.25.4(graphology-types@0.24.7)
-      graphology-layout:
-        specifier: ^0.6.1
-        version: 0.6.1(graphology-types@0.24.7)
-      graphology-layout-forceatlas2:
-        specifier: ^0.10.1
-        version: 0.10.1(graphology-types@0.24.7)
-      sigma:
-        specifier: 3.0.0-alpha3
-        version: 3.0.0-alpha3(graphology-types@0.24.7)
-      zod:
-        specifier: ^3.23.8
-        version: 3.23.8
     devDependencies:
       '@fontsource/fira-mono':
         specifier: ^4.5.10
@@ -57,12 +38,27 @@ importers:
       eslint-plugin-svelte:
         specifier: ^2.46.0
         version: 2.46.0(eslint@9.13.0)(svelte@5.0.5)
+      globals:
+        specifier: ^15.11.0
+        version: 15.11.0
+      graphology:
+        specifier: ^0.25.4
+        version: 0.25.4(graphology-types@0.24.7)
+      graphology-layout:
+        specifier: ^0.6.1
+        version: 0.6.1(graphology-types@0.24.7)
+      graphology-layout-forceatlas2:
+        specifier: ^0.10.1
+        version: 0.10.1(graphology-types@0.24.7)
       prettier:
         specifier: ^3.3.3
         version: 3.3.3
       prettier-plugin-svelte:
         specifier: ^3.2.7
         version: 3.2.7(prettier@3.3.3)(svelte@5.0.5)
+      sigma:
+        specifier: 3.0.0-alpha3
+        version: 3.0.0-alpha3(graphology-types@0.24.7)
       svelte:
         specifier: ^5.0.5
         version: 5.0.5
@@ -81,6 +77,9 @@ importers:
       vite:
         specifier: ^5.4.10
         version: 5.4.10
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
 
 packages:
 
