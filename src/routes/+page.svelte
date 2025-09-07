@@ -7,16 +7,20 @@
 	import { onMount } from 'svelte';
 	import type { EdgeDisplayData, NodeDisplayData } from 'sigma/types';
 	import type Sigma from 'sigma';
+	import NodeDetailedMenu from './NodeDetailedMenu.svelte';
 
 	interface OutDegrees {
 		percent: number;
 		node: string;
 	}
 
-	const showModal = true;
+	let showModal = $state(true);
 	let container = $state<HTMLElement>();
 	let hoveredNode: string | undefined;
 	let hoveredNeibors: Set<string> | undefined;
+	let selectedNode = $state(undefined);
+	let graph = $state<Graph>();
+	let isNodeMenuOpen = $state(false);
 
 	const setHoveredNode = (renderer: Sigma, graph: Graph, node?: string) => {
 		if (typeof node === 'undefined') {
@@ -36,15 +40,14 @@
 		file.subscribe((file) => {
 			if (file === null) return;
 
-			const graph = new Graph();
+			const graphInstance = new Graph();
 			for (const page of file.pages) {
-				graph.addNode(page.id, { label: page.title.toLowerCase().replaceAll(' ', '_') });
+				graphInstance.addNode(page.id, { label: page.title.toLowerCase().replaceAll(' ', '_') });
 			}
-			graph;
 
 			for (const page of file.pages) {
 				for (const linkedElem of page.linksLc) {
-					const directedNode = graph.findNode((node, attr) =>
+					const directedNode = graphInstance.findNode((node, attr) =>
 						attr.label == null
 							? false
 							: attr.label.toLowerCase().replaceAll(' ', '_') ===
@@ -56,34 +59,34 @@
 								linkedElem.toLowerCase().replaceAll(' ', '_');
 						});
 						if (typeof fromFile === 'undefined') {
-							graph.addNode(linkedElem.toLowerCase().replaceAll(' ', '_'), {
+							graphInstance.addNode(linkedElem.toLowerCase().replaceAll(' ', '_'), {
 								label: linkedElem.toLowerCase().replaceAll(' ', '_')
 							});
-							graph.addEdge(page.id, linkedElem.toLowerCase().replaceAll(' ', '_'), {
+							graphInstance.addEdge(page.id, linkedElem.toLowerCase().replaceAll(' ', '_'), {
 								type: 'arrow'
 							});
 						} else {
-							graph.mergeNode(fromFile.id, {
+							graphInstance.mergeNode(fromFile.id, {
 								label: fromFile.title.toLowerCase().replaceAll(' ', '_')
 							});
-							graph.addEdge(page.id, fromFile.id, { type: 'arrow' });
+							graphInstance.addEdge(page.id, fromFile.id, { type: 'arrow' });
 						}
 					} else {
-						graph.addEdge(page.id, directedNode, { type: 'arrow' });
+						graphInstance.addEdge(page.id, directedNode, { type: 'arrow' });
 					}
 				}
 			}
 
-			const inDegrees = graph.nodes().map((node) => graph.inDegree(node));
-			const edgeCount = graph.edges().length;
+			const inDegrees = graphInstance.nodes().map((node) => graphInstance.inDegree(node));
+			const edgeCount = graphInstance.edges().length;
 			console.log(edgeCount);
 			const minDegree = Math.min(...inDegrees);
 			const maxDegree = Math.max(...inDegrees);
 			const outDegrees: OutDegrees[] = [];
-			graph
+			graphInstance
 				.nodes()
 				.forEach((node) =>
-					outDegrees.push({ node: node, percent: graph.outDegree(node) / edgeCount })
+					outDegrees.push({ node: node, percent: graphInstance.outDegree(node) / edgeCount })
 				);
 			outDegrees.sort((a, b) => (a.percent < b.percent ? 1 : -1));
 			const blueIndex = Math.round(edgeCount * 3e-7) - 1;
@@ -110,41 +113,41 @@
 					color = '#ffcc6f';
 				}
 
-				graph.setNodeAttribute(node.node, 'color', color);
+				graphInstance.setNodeAttribute(node.node, 'color', color);
 			});
 			const minSize = 4;
 			const maxSize = 25;
-			graph.forEachNode((node) => {
-				const deg = graph.inDegree(node);
-				graph.setNodeAttribute(
+			graphInstance.forEachNode((node) => {
+				const deg = graphInstance.inDegree(node);
+				graphInstance.setNodeAttribute(
 					node,
 					'size',
 					minSize + ((deg - minDegree) / (maxDegree - minDegree)) * (maxSize - minSize)
 				);
 			});
 
-			circular.assign(graph);
-			const settings = forceAtlas2.inferSettings(graph);
-			forceAtlas2.assign(graph, { settings, iterations: 600 });
+			circular.assign(graphInstance);
+			const settings = forceAtlas2.inferSettings(graphInstance);
+			forceAtlas2.assign(graphInstance, { settings, iterations: 600 });
 
-			const renderer = new Sigma(graph, container);
+			graph = graphInstance
+
+			const renderer = new Sigma(graphInstance, container);
 			//renderer.setSetting('labelColor', { color: '#f6f6f6' });
 			//renderer.setSetting('defaultEdgeColor', '#D3D3D3');
 			//renderer.setSetting('defaultNodeColor', '#D3D3D3');
 			renderer.on('enterNode', ({ node }) => {
-				setHoveredNode(renderer, graph, node);
+				setHoveredNode(renderer, graphInstance, node);
 			});
 			renderer.on('leaveNode', () => {
-				setHoveredNode(renderer, graph, undefined);
+				setHoveredNode(renderer, graphInstance, undefined);
 			});
 			renderer.on('clickNode', ({ node: node_id }) => {
-				const node = graph.findNode((node) => node === node_id);
-				const label = graph.getNodeAttribute(node, 'label');
-				window.open(
-					`https://scrapbox.io/${file.name}/${label.replaceAll('_', ' ')}`,
-					'_blank',
-					'noopener,noreferrer'
-				);
+				const node = graphInstance.findNode((node) => node === node_id);
+				const label = graphInstance.getNodeAttribute(node!, 'label');
+				const pageName = label.replaceAll('_', ' ')
+				selectedNode = pageName
+				isNodeMenuOpen = true
 			});
 
 			renderer.setSetting('nodeReducer', (node, data) => {
@@ -160,7 +163,7 @@
 			renderer.setSetting('edgeReducer', (edge, data) => {
 				const res: Partial<EdgeDisplayData> = { ...data };
 
-				if (hoveredNode && !graph.hasExtremity(edge, hoveredNode)) {
+				if (hoveredNode && !graphInstance.hasExtremity(edge, hoveredNode)) {
 					res.hidden = true;
 				}
 				return res;
@@ -179,8 +182,15 @@
 	</style>
 </svelte:head>
 
-<FileSelector {showModal} />
-<div id="sigma-container" bind:this={container}></div>
+<div class="relative">
+	{#if showModal}
+		<FileSelector {showModal} />
+	{/if}
+	{#if selectedNode && isNodeMenuOpen && graph}
+		<NodeDetailedMenu isOpen={isNodeMenuOpen} {graph} node={selectedNode} />
+	{/if}
+	<div id="sigma-container" bind:this={container}></div>
+</div>
 
 <style>
 	#sigma-container {
