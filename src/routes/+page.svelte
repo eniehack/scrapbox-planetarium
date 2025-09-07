@@ -144,10 +144,9 @@
 			});
 			renderer.on('clickNode', ({ node: node_id }) => {
 				const node = graphInstance.findNode((node) => node === node_id);
-				const label = graphInstance.getNodeAttribute(node!, 'label');
-				const pageName = label.replaceAll('_', ' ')
-				selectedNode = pageName
+				selectedNode = node!
 				isNodeMenuOpen = true
+				setHoveredNode(renderer, graphInstance, node);
 			});
 
 			renderer.setSetting('nodeReducer', (node, data) => {

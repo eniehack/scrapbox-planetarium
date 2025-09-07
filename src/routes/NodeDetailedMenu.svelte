@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type Graph from "graphology";
+	import { getLabel } from "./label";
 	type Props = {
 		node: string
 		isOpen: boolean
@@ -27,6 +28,7 @@
 			return []
 		}
 	})
+	let selectednodeLabel = $derived(getLabel(graph, selectedNode))
 
 	const closePanel = () => {
 		isOpen = false;
@@ -43,19 +45,19 @@
 		×
 	</button>
 	
-	<section class="prose ">
-	<h2>{selectedNode}</h2>
+	<section class="prose">
+	<h2>{selectednodeLabel}</h2>
 	<div class="space-y-2 overflow-y-scroll">
 		<p>このページからリンクしているページたち</p>
 		<ul>
 		{#each outNeighbors as neighbor}
-			<li>{neighbor.label}</li>
+			<li class="text-sky-600 hover:underline" onclick={() => selectedNode = neighbor.node}>{neighbor.label}</li> 
 		{/each}
 		</ul>
 		<p>このページへリンクしているページたち</p>
 		<ul>
 		{#each inNeighbors as neighbor}
-			<li onclick={() => selectedNode = neighbor.node}>{neighbor.label}</li> 
+			<li class="text-sky-600 hover:underline" onclick={() => selectedNode = neighbor.node}>{neighbor.label}</li> 
 		{/each}
 		</ul>
 	</div>
