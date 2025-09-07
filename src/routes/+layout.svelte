@@ -6,6 +6,7 @@
 
 	/** @type {Props} */
 	const { children } = $props();
+	import '../app.css';
 </script>
 
 <div class="app">
