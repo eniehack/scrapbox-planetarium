@@ -6,7 +6,7 @@
 		isOpen: boolean
 		graph: Graph
 	}
-	let { node: selectedNode, graph, isOpen = $bindable() }: Props = $props();
+	let { node: selectedNode = $bindable(), graph, isOpen = $bindable() }: Props = $props();
 	let outNeighbors = $derived.by<Array<{label: string, node: string}>>(() => {
 		try {
 			return graph.outNeighbors(selectedNode).map(node => {

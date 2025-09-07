@@ -21,6 +21,7 @@
 	let selectedNode = $state(undefined);
 	let graph = $state<Graph>();
 	let isNodeMenuOpen = $state(false);
+	let renderer = $state<Sigma>()
 
 	const setHoveredNode = (renderer: Sigma, graph: Graph, node?: string) => {
 		if (typeof node === 'undefined') {
@@ -132,21 +133,21 @@
 
 			graph = graphInstance
 
-			const renderer = new Sigma(graphInstance, container);
+			renderer = new Sigma(graphInstance, container);
 			//renderer.setSetting('labelColor', { color: '#f6f6f6' });
 			//renderer.setSetting('defaultEdgeColor', '#D3D3D3');
 			//renderer.setSetting('defaultNodeColor', '#D3D3D3');
 			renderer.on('enterNode', ({ node }) => {
-				setHoveredNode(renderer, graphInstance, node);
+				if (!isNodeMenuOpen) setHoveredNode(renderer!, graphInstance, node);
 			});
 			renderer.on('leaveNode', () => {
-				setHoveredNode(renderer, graphInstance, undefined);
+				if (!isNodeMenuOpen) setHoveredNode(renderer!, graphInstance, undefined);
 			});
 			renderer.on('clickNode', ({ node: node_id }) => {
 				const node = graphInstance.findNode((node) => node === node_id);
 				selectedNode = node!
 				isNodeMenuOpen = true
-				setHoveredNode(renderer, graphInstance, node);
+				setHoveredNode(renderer!, graphInstance, node);
 			});
 
 			renderer.setSetting('nodeReducer', (node, data) => {
@@ -169,6 +170,11 @@
 			});
 		});
 	});
+	$effect(() => {
+		if (isNodeMenuOpen && graph && renderer && selectedNode) {
+			setHoveredNode(renderer, graph, selectedNode);
+		}
+	})
 </script>
 
 <svelte:head>
@@ -186,7 +192,7 @@
 		<FileSelector {showModal} />
 	{/if}
 	{#if selectedNode && isNodeMenuOpen && graph}
-		<NodeDetailedMenu isOpen={isNodeMenuOpen} {graph} node={selectedNode} />
+		<NodeDetailedMenu bind:isOpen={isNodeMenuOpen} {graph} bind:node={selectedNode} />
 	{/if}
 	<div id="sigma-container" bind:this={container}></div>
 </div>
