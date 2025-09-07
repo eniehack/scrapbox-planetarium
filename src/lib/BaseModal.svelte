@@ -12,7 +12,7 @@
 	});
 </script>
 
-<dialog bind:this={dialog} onclose={() => (showModal = false)}>
+<dialog class="prose" bind:this={dialog} onclose={() => (showModal = false)}>
 	<div>
 		<div class="header"></div>
 		{@render children?.()}
