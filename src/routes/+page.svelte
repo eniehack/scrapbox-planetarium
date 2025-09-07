@@ -6,8 +6,9 @@
 	import forceAtlas2 from 'graphology-layout-forceatlas2';
 	import { onMount } from 'svelte';
 	import type { EdgeDisplayData, NodeDisplayData } from 'sigma/types';
-	import type Sigma from 'sigma';
+	import Sigma from 'sigma';
 	import NodeDetailedMenu from './NodeDetailedMenu.svelte';
+	import type { Attachment } from 'svelte/attachments';
 
 	interface OutDegrees {
 		percent: number;
@@ -19,9 +20,9 @@
 	let hoveredNode: string | undefined;
 	let hoveredNeibors: Set<string> | undefined;
 	let selectedNode = $state<string | undefined>(undefined);
-	let graph = $state<Graph>();
+	let graph = $state<Graph>(new Graph());
 	let isNodeMenuOpen = $state(false);
-	let renderer = $state<Sigma>()
+	let renderer = $state<Sigma>();
 
 	const setHoveredNode = (renderer: Sigma, graph: Graph, node?: string) => {
 		if (typeof node === 'undefined') {
@@ -34,21 +35,23 @@
 
 		renderer.refresh();
 	};
+	const initializeSigma: Attachment = (container) => {
+		renderer = new Sigma(graph, container);
+	}
 
 	onMount(async () => {
-		const { Sigma } = await import('sigma');
-		if (typeof container === "undefined") return
 		file.subscribe((file) => {
 			if (file === null) return;
+			if (!graph) return;
+			if (!renderer) return;
 
-			const graphInstance = new Graph();
 			for (const page of file.pages) {
-				graphInstance.addNode(page.id, { label: page.title.toLowerCase().replaceAll(' ', '_') });
+				graph.addNode(page.id, { label: page.title.toLowerCase().replaceAll(' ', '_') });
 			}
 
 			for (const page of file.pages) {
 				for (const linkedElem of page.linksLc) {
-					const directedNode = graphInstance.findNode((node, attr) =>
+					const directedNode = graph.findNode((node, attr) =>
 						attr.label == null
 							? false
 							: attr.label.toLowerCase().replaceAll(' ', '_') ===
@@ -60,34 +63,34 @@
 								linkedElem.toLowerCase().replaceAll(' ', '_');
 						});
 						if (typeof fromFile === 'undefined') {
-							graphInstance.addNode(linkedElem.toLowerCase().replaceAll(' ', '_'), {
+							graph.addNode(linkedElem.toLowerCase().replaceAll(' ', '_'), {
 								label: linkedElem.toLowerCase().replaceAll(' ', '_')
 							});
-							graphInstance.addEdge(page.id, linkedElem.toLowerCase().replaceAll(' ', '_'), {
+							graph.addEdge(page.id, linkedElem.toLowerCase().replaceAll(' ', '_'), {
 								type: 'arrow'
 							});
 						} else {
-							graphInstance.mergeNode(fromFile.id, {
+							graph.mergeNode(fromFile.id, {
 								label: fromFile.title.toLowerCase().replaceAll(' ', '_')
 							});
-							graphInstance.addEdge(page.id, fromFile.id, { type: 'arrow' });
+							graph.addEdge(page.id, fromFile.id, { type: 'arrow' });
 						}
 					} else {
-						graphInstance.addEdge(page.id, directedNode, { type: 'arrow' });
+						graph.addEdge(page.id, directedNode, { type: 'arrow' });
 					}
 				}
 			}
 
-			const inDegrees = graphInstance.nodes().map((node) => graphInstance.inDegree(node));
-			const edgeCount = graphInstance.edges().length;
+			const inDegrees = graph.nodes().map((node) => graph.inDegree(node));
+			const edgeCount = graph.edges().length;
 			console.log(edgeCount);
 			const minDegree = Math.min(...inDegrees);
 			const maxDegree = Math.max(...inDegrees);
 			const outDegrees: OutDegrees[] = [];
-			graphInstance
+			graph
 				.nodes()
 				.forEach((node) =>
-					outDegrees.push({ node: node, percent: graphInstance.outDegree(node) / edgeCount })
+					outDegrees.push({ node: node, percent: graph.outDegree(node) / edgeCount })
 				);
 			outDegrees.sort((a, b) => (a.percent < b.percent ? 1 : -1));
 			const blueIndex = Math.round(edgeCount * 3e-7) - 1;
@@ -114,40 +117,37 @@
 					color = '#ffcc6f';
 				}
 
-				graphInstance.setNodeAttribute(node.node, 'color', color);
+				graph.setNodeAttribute(node.node, 'color', color);
 			});
 			const minSize = 4;
 			const maxSize = 25;
-			graphInstance.forEachNode((node) => {
-				const deg = graphInstance.inDegree(node);
-				graphInstance.setNodeAttribute(
+			graph.forEachNode((node) => {
+				const deg = graph.inDegree(node);
+				graph.setNodeAttribute(
 					node,
 					'size',
 					minSize + ((deg - minDegree) / (maxDegree - minDegree)) * (maxSize - minSize)
 				);
 			});
 
-			circular.assign(graphInstance);
-			const settings = forceAtlas2.inferSettings(graphInstance);
-			forceAtlas2.assign(graphInstance, { settings, iterations: 600 });
+			circular.assign(graph);
+			const settings = forceAtlas2.inferSettings(graph);
+			forceAtlas2.assign(graph, { settings, iterations: 600 });
 
-			graph = graphInstance
-
-			renderer = new Sigma(graphInstance, container);
 			//renderer.setSetting('labelColor', { color: '#f6f6f6' });
 			//renderer.setSetting('defaultEdgeColor', '#D3D3D3');
 			//renderer.setSetting('defaultNodeColor', '#D3D3D3');
 			renderer.on('enterNode', ({ node }) => {
-				if (!isNodeMenuOpen) setHoveredNode(renderer!, graphInstance, node);
+				if (!isNodeMenuOpen) setHoveredNode(renderer!, graph, node);
 			});
 			renderer.on('leaveNode', () => {
-				if (!isNodeMenuOpen) setHoveredNode(renderer!, graphInstance, undefined);
+				if (!isNodeMenuOpen) setHoveredNode(renderer!, graph, undefined);
 			});
 			renderer.on('clickNode', ({ node: node_id }) => {
-				const node = graphInstance.findNode((node) => node === node_id);
+				const node = graph.findNode((node) => node === node_id);
 				selectedNode = node!
 				isNodeMenuOpen = true
-				setHoveredNode(renderer!, graphInstance, node);
+				setHoveredNode(renderer!, graph, node);
 			});
 
 			renderer.setSetting('nodeReducer', (node, data) => {
@@ -163,7 +163,7 @@
 			renderer.setSetting('edgeReducer', (edge, data) => {
 				const res: Partial<EdgeDisplayData> = { ...data };
 
-				if (hoveredNode && !graphInstance.hasExtremity(edge, hoveredNode)) {
+				if (hoveredNode && !graph.hasExtremity(edge, hoveredNode)) {
 					res.hidden = true;
 				}
 				return res;
@@ -171,8 +171,14 @@
 		});
 	});
 	$effect(() => {
-		if (isNodeMenuOpen && graph && renderer && selectedNode) {
-			setHoveredNode(renderer, graph, selectedNode);
+		if (graph && renderer && selectedNode) {
+			if (isNodeMenuOpen) {
+				setHoveredNode(renderer, graph, selectedNode);
+			} else {
+				setHoveredNode(renderer, graph, undefined);
+			}
+		}
+	})
 		}
 	})
 </script>
@@ -194,7 +200,7 @@
 	{#if selectedNode && isNodeMenuOpen && graph}
 		<NodeDetailedMenu bind:isOpen={isNodeMenuOpen} {graph} bind:node={selectedNode} />
 	{/if}
-	<div id="sigma-container" bind:this={container}></div>
+	<div id="sigma-container" {@attach initializeSigma}></div>
 </div>
 
 <style>
