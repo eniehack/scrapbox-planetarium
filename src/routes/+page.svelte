@@ -18,7 +18,7 @@
 	let container = $state<HTMLElement>();
 	let hoveredNode: string | undefined;
 	let hoveredNeibors: Set<string> | undefined;
-	let selectedNode = $state(undefined);
+	let selectedNode = $state<string | undefined>(undefined);
 	let graph = $state<Graph>();
 	let isNodeMenuOpen = $state(false);
 	let renderer = $state<Sigma>()
